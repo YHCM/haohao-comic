@@ -790,7 +790,7 @@ onUnmounted(() => {
 .comic-scroll-content {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 20px 0;
+  padding: 0 0;
 }
 
 /* 单页漫画样式 */
@@ -805,10 +805,10 @@ onUnmounted(() => {
 }
 
 .comic-image {
-  width: auto;
+  width: 800px;
   height: auto;
   max-width: 100%;
-  max-height: calc(100vh - 220px); /* 确保单页不超出屏幕，适配工具栏 */
+  /* max-height: calc(100vh - 220px); /* 确保单页不超出屏幕，适配工具栏 */
   object-fit: contain;
   /* border-radius: 4px; */
   /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); */
@@ -993,7 +993,7 @@ onUnmounted(() => {
   }
 
   .comic-scroll-content {
-    padding: 10px 0;
+    padding: 0 0;
   }
 
   .comic-image {
