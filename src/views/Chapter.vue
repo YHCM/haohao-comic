@@ -418,55 +418,8 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* 全局CSS变量：定义主题色（浅色模式默认） */
-:root {
-  --accent-color: #42b983;
-  --bg-primary: #f8f9fa;
-  --bg-toolbar: #fff;
-  --text-primary: #333;
-  --text-secondary: #666;
-  --text-tertiary: #999;
-  --border-color: #eee;
-  --btn-bg: #f0f0f0;
-  --btn-bg-hover: #e0e0e0;
-  --btn-text: #333;
-  --scrollbar-track: #f1f1f1;
-  --scrollbar-thumb: #ccc;
-  --scrollbar-thumb-hover: #bbb;
-}
-
-/* 暗色模式CSS变量 */
-.dark-mode {
-  --accent-color: #42b983;
-  --bg-primary: #000;
-  --bg-toolbar: rgba(0, 0, 0, 0.8);
-  --text-primary: #fff;
-  --text-secondary: #ccc;
-  --border-color: #333;
-  --btn-bg: rgba(255, 255, 255, 0.1);
-  --btn-bg-hover: rgba(255, 255, 255, 0.2);
-  --btn-text: #fff;
-  --scrollbar-track: rgba(255, 255, 255, 0.05);
-  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
-  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
-}
-
 /* 全局样式：使用CSS变量实现主题切换 */
 .comic-reader {
-  --accent-color: #42b983;
-  --bg-primary: #f8f9fa;
-  --bg-toolbar: #fff;
-  --text-primary: #333;
-  --text-secondary: #666;
-  --text-tertiary: #999;
-  --border-color: #eee;
-  --btn-bg: #f0f0f0;
-  --btn-bg-hover: #e0e0e0;
-  --btn-text: #333;
-  --scrollbar-track: #f1f1f1;
-  --scrollbar-thumb: #ccc;
-  --scrollbar-thumb-hover: #bbb;
-
   min-height: 100vh;
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -498,7 +451,7 @@ onUnmounted(() => {
 }
 
 .header-content {
-  max-width: 1600px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
@@ -598,7 +551,7 @@ onUnmounted(() => {
   overflow-y: auto;
   scroll-behavior: smooth;
   box-sizing: border-box;
-  padding: 70px 0 80px 0; /* 上下留出工具栏空间，适配浅色模式 */
+  /* padding: 70px 0 80px 0; /* 上下留出工具栏空间，适配浅色模式 */
 }
 
 /* 滚动条美化（使用CSS变量） */
@@ -827,7 +780,7 @@ onUnmounted(() => {
   }
 
   .comic-image {
-    max-height: calc(100vh - 200px);
+    /* max-height: calc(100vh - 200px); */
   }
 
   .chapter-btn {
@@ -836,7 +789,8 @@ onUnmounted(() => {
   }
 
   .scroll-container {
-    padding: 60px 0 70px 0;
+    /* padding: 60px 0 70px 0; */
+    padding: 0 0 0 0;
   }
 }
 
@@ -864,11 +818,12 @@ onUnmounted(() => {
   }
 
   .scroll-container {
-    padding: 55px 0 65px 0;
+    /* padding: 55px 0 65px 0; */
+    padding: 0 0 0 0;
   }
 
   .comic-image {
-    max-height: calc(100vh - 180px);
+    /* max-height: calc(100vh - 180px); */
   }
 }
 </style>

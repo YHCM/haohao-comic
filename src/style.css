@@ -5,3 +5,36 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+/* 全局CSS变量：浅色模式默认 */
+:root {
+  --accent-color: #42b983;
+  --bg-primary: #f8f9fa;
+  --bg-toolbar: #fff;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --text-tertiary: #999;
+  --border-color: #eee;
+  --btn-bg: #f0f0f0;
+  --btn-bg-hover: #e0e0e0;
+  --btn-text: #333;
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #ccc;
+  --scrollbar-thumb-hover: #bbb;
+}
+
+/* 暗色模式全局变量 */
+.dark-mode {
+  --accent-color: #42b983;
+  --bg-primary: #000;
+  --bg-toolbar: rgba(0, 0, 0, 0.8);
+  --text-primary: #fff;
+  --text-secondary: #ccc;
+  --border-color: #333;
+  --btn-bg: rgba(255, 255, 255, 0.1);
+  --btn-bg-hover: rgba(255, 255, 255, 0.2);
+  --btn-text: #fff;
+  --scrollbar-track: rgba(255, 255, 255, 0.05);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+}
