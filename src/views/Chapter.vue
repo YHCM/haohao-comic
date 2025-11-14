@@ -250,17 +250,22 @@ onUnmounted(() => {
           <!-- 遍历所有漫画页，纵向排列 -->
           <div v-for="(page, index) in pages" :key="page.id || index" class="comic-page-item">
             <img
-              :src="page.image"
-              :alt="`第 ${index + 1} 页`"
-              class="comic-image"
-              loading="lazy"
+              :src="
+                isDarkMode
+                  ? `https://placehold.co/800x1200/333333/FFFFFF?text=${index + 1} page loading`
+                  : `https://placehold.co/800x1200/F8F9FA/666666?text=${index + 1} page loading`
+              "
+              @load="(e) => (e.target.src = page.image)"
               @error="
                 (e) => {
                   e.target.src = isDarkMode
-                    ? 'https://via.placeholder.com/800x1200?text=图片加载失败'
-                    : 'https://via.placeholder.com/800x1200?bgcolor=f8f9fa&color=666&text=图片加载失败'
+                    ? `https://placehold.co/800x1200/333333/FFFFFF?text=${index + 1} page error`
+                    : `https://placehold.co/800x1200/F8F9FA/666666?text=${index + 1} page error`
                 }
               "
+              :alt="`第 ${index + 1} 页`"
+              class="comic-image"
+              loading="lazy"
             />
           </div>
         </div>
@@ -428,7 +433,6 @@ onUnmounted(() => {
   overflow-y: auto;
   scroll-behavior: smooth;
   box-sizing: border-box;
-  /* padding: 70px 0 80px 0; /* 上下留出工具栏空间，适配浅色模式 */
 }
 
 /* 滚动条美化（使用CSS变量） */
@@ -460,22 +464,16 @@ onUnmounted(() => {
 /* 单页漫画样式 */
 .comic-page-item {
   width: 100%;
-  /* margin-bottom: 15px; */
   display: flex;
   justify-content: center;
   background-color: var(--bg-primary);
-  /* padding: 10px 0; */
-  /* border-radius: 8px; */
 }
 
 .comic-image {
   width: 800px;
   height: auto;
   max-width: 100%;
-  /* max-height: calc(100vh - 220px); /* 确保单页不超出屏幕，适配工具栏 */
   object-fit: contain;
-  /* border-radius: 4px; */
-  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); */
 }
 
 /* 加载状态 */

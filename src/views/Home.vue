@@ -41,7 +41,7 @@ watch(
     searchQuery.value = keyword // 同步参数到搜索输入框
     fetchComics(keyword) // 触发搜索
   },
-  { immediate: true } // 初始挂载时就执行一次（处理页面刷新时的参数）
+  { immediate: true }, // 初始挂载时就执行一次（处理页面刷新时的参数）
 )
 
 // 表单提交搜索
