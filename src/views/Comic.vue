@@ -142,9 +142,7 @@ onMounted(() => {
               class="chapter-item"
               @click="handleChapterClick(chapter.id)"
             >
-              <div class="chapter-number">第 {{ chapter.number }} 话</div>
               <div class="chapter-title">{{ chapter.title }}</div>
-              <div class="chapter-arrow">→</div>
             </div>
           </div>
         </section>
@@ -410,13 +408,6 @@ onMounted(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
 }
 
-.chapter-number {
-  font-weight: 600;
-  color: #42b983;
-  font-size: 1.1rem;
-  min-width: 80px;
-}
-
 .chapter-title {
   flex: 1;
   color: #333;
@@ -425,11 +416,6 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   margin: 0 1rem;
-}
-
-.chapter-arrow {
-  color: #7f8c8d;
-  font-size: 1.2rem;
 }
 
 /* 页脚样式 */
@@ -450,10 +436,6 @@ onMounted(() => {
   .comic-cover {
     width: 250px;
     height: 375px;
-  }
-
-  .chapters-list {
-    grid-template-columns: 1fr;
   }
 
   .header-content {
@@ -496,11 +478,6 @@ onMounted(() => {
 
   .chapter-item {
     padding: 1rem;
-  }
-
-  .chapter-number {
-    min-width: 60px;
-    font-size: 1rem;
   }
 
   .chapter-title {

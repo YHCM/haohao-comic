@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useRoute } from 'vue-router' // 新增：导入路由钩子
+import { useRoute } from 'vue-router'
 import SearchIcon from '@/components/SearchIcon.vue'
 import ErrorIcon from '@/components/ErrorIcon.vue'
 import EmptyIcon from '@/components/EmptyIcon.vue'
