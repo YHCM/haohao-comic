@@ -309,6 +309,9 @@ onMounted(() => {
   padding: 2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   align-items: flex-start;
+  /* 小屏幕纵向排列 */
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .comic-cover-wrapper {
@@ -434,8 +437,8 @@ onMounted(() => {
   }
 
   .comic-cover {
-    width: 250px;
-    height: 375px;
+    width: 150px;
+    height: 200px;
   }
 
   .header-content {
@@ -456,12 +459,25 @@ onMounted(() => {
 @media (max-width: 480px) {
   .comic-info-section {
     padding: 1.5rem;
-    gap: 1.5rem;
+    gap: 1.2rem;
+  }
+
+  .comic-cover-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 
   .comic-cover {
-    width: 200px;
-    height: 300px;
+    width: 180px; /* 缩小移动端封面宽度 */
+    height: 240px;
+  }
+
+  .comic-meta {
+    width: 100%;
+    gap: 1rem;
+    padding-top: 0;
+    text-align: center; /* 移动端信息居中 */
   }
 
   .comic-title {
@@ -469,7 +485,7 @@ onMounted(() => {
   }
 
   .meta-item {
-    font-size: 1rem;
+    justify-content: center; /* 标签和值居中对齐 */
   }
 
   .chapters-section {
