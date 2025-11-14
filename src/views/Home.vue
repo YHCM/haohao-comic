@@ -5,7 +5,7 @@ import { ref, onMounted, computed } from 'vue'
 import SearchIcon from '@/components/SearchIcon.vue'
 import ErrorIcon from '@/components/ErrorIcon.vue'
 import EmptyIcon from '@/components/EmptyIcon.vue'
-// import LoadingIcon from '@/components/LoadingIcon.vue'
+import Logo from '@/components/Logo.vue'
 
 const turso = createClient({
   url: 'libsql://test-super-hao.aws-ap-northeast-1.turso.io',
@@ -51,11 +51,6 @@ onMounted(() => {
   fetchComics()
 })
 
-// 跳转到主页
-const goToHome = () => {
-  router.push('/')
-}
-
 const handleSearch = (e) => {
   e.preventDefault()
 }
@@ -67,9 +62,8 @@ const handleSearch = (e) => {
     <header class="app-header">
       <!-- 内容容器：控制最大宽度，与漫画容器一致 -->
       <div class="header-content">
-        <!-- <h1 class="app-title">好好漫画</h1> -->
-        <h1 class="app-title" @click="goToHome" style="cursor: pointer">好好漫画</h1>
-
+        <Logo class="app-logo" />
+        
         <!-- 搜索框 -->
         <form @submit="handleSearch" class="search-form">
           <input
@@ -79,7 +73,7 @@ const handleSearch = (e) => {
             class="search-input"
           />
           <button type="submit" class="search-btn">
-            <searchIcon />
+            <SearchIcon />
           </button>
         </form>
       </div>
@@ -89,7 +83,6 @@ const handleSearch = (e) => {
     <main class="comic-container">
       <div v-if="loading" class="loading-state">
         <div class="spinner"></div>
-        <!-- <LoadingIcon class="loading-icon" /> -->
         <p>加载中...</p>
       </div>
 
@@ -112,7 +105,6 @@ const handleSearch = (e) => {
         >
           <div class="comic-cover">
             <img :src="comic.cover" :alt="comic.title" class="cover-image" loading="lazy" />
-            <!-- @error="(e) => e.target.src = 'https://via.placeholder.com/200x300?text=封面缺失'" -->
           </div>
           <div class="comic-info">
             <h3 class="comic-title">{{ comic.title }}</h3>
@@ -140,43 +132,43 @@ const handleSearch = (e) => {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* 头部样式：关键修改部分 */
+/* 头部样式：添加 Logo 相关样式 */
 .app-header {
   background-color: #fff;
-  padding: 1rem 0; /* 上下内边距，左右不设（由内容容器控制） */
+  padding: 1rem 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  width: 100%; /* 确保占据全屏宽度 */
-  position: sticky; /* 可选：滚动时固定头部 */
-  top: 0;
-  z-index: 100; /* 确保在内容上方 */
-}
-
-/* 头部内容容器：控制最大宽度，与漫画容器一致 */
-.header-content {
-  max-width: 1400px; /* 和下面的 comic-container 保持一致 */
   width: 100%;
-  margin: 0 auto; /* 水平居中 */
-  padding: 0 2rem; /* 左右留白，和漫画容器的 padding 一致 */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 2rem;
   display: flex;
-  align-items: center; /* 垂直居中对齐 */
-  justify-content: space-between; /* 两端对齐，logo 在左，搜索框在右 */
-  gap: 1rem; /* 元素之间的最小间距，防止挤在一起 */
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-.app-title {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 1.8rem;
-  white-space: nowrap; /* 防止标题换行 */
+/* Logo 样式：根据实际 Logo 大小调整，确保适配布局 */
+.app-logo {
+  /* 可根据 Logo 实际尺寸调整，这里提供默认适配 */
+  width: auto;
+  height: 40px; /* 控制 Logo 高度，避免过大 */
+  cursor: pointer; /* 保持指针样式，提示可点击 */
 }
 
-/* 搜索框：适配同行布局 */
+/* 搜索框样式（保持不变） */
 .search-form {
   display: flex;
-  flex: 1; /* 让搜索框容器占据剩余空间 */
-  max-width: 600px; /* 限制搜索框最大宽度，避免太宽 */
+  flex: 1;
+  max-width: 600px;
   gap: 0.5rem;
-  min-width: 150px; /* 最小宽度，防止手机上太窄 */
+  min-width: 150px;
 }
 
 .search-input {
@@ -220,7 +212,6 @@ const handleSearch = (e) => {
   width: 100%;
 }
 
-/* 加载状态 */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -255,7 +246,6 @@ const handleSearch = (e) => {
   }
 }
 
-/* 错误状态 */
 .error-state {
   display: flex;
   flex-direction: column;
@@ -267,7 +257,6 @@ const handleSearch = (e) => {
   text-align: center;
 }
 
-/* 空状态 */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -279,7 +268,6 @@ const handleSearch = (e) => {
   text-align: center;
 }
 
-/* 漫画网格 */
 .comic-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -287,7 +275,6 @@ const handleSearch = (e) => {
   margin-top: 1rem;
 }
 
-/* 漫画卡片 */
 .comic-card {
   background-color: #fff;
   border-radius: 12px;
@@ -309,7 +296,7 @@ const handleSearch = (e) => {
 
 .comic-cover {
   position: relative;
-  padding-top: 133%; /* 3:4 比例 */
+  padding-top: 133%;
   overflow: hidden;
   background-color: #f0f0f0;
 }
@@ -360,7 +347,7 @@ const handleSearch = (e) => {
   margin-top: auto;
 }
 
-/* 响应式调整：优化手机端显示 */
+/* 响应式调整：优化 Logo 在手机端的显示 */
 @media (max-width: 768px) {
   .comic-container {
     padding: 1rem;
@@ -371,18 +358,18 @@ const handleSearch = (e) => {
     gap: 1rem;
   }
 
-  /* 头部响应式：标题缩小，搜索框适配 */
-  .app-title {
-    font-size: 1.5rem;
-  }
-
   .header-content {
-    padding: 0 1rem; /* 手机端左右留白减小 */
+    padding: 0 1rem;
   }
 
   .search-input {
     padding: 0.7rem;
     font-size: 0.9rem;
+  }
+
+  /* 调整手机端 Logo 大小 */
+  .app-logo {
+    height: 35px;
   }
 }
 
@@ -395,20 +382,20 @@ const handleSearch = (e) => {
     font-size: 1rem;
   }
 
-  /* 手机端：标题和搜索框换行显示，确保不拥挤 */
   .header-content {
-    flex-direction: column; /* 垂直排列 */
-    align-items: center; /* 居中对齐 */
+    flex-direction: column;
+    align-items: center;
     gap: 0.8rem;
   }
 
   .search-form {
-    max-width: 100%; /* 搜索框占满宽度 */
+    max-width: 100%;
     width: 100%;
   }
 
-  .app-title {
-    font-size: 1.4rem;
+  /* 手机端 Logo 进一步缩小 */
+  .app-logo {
+    height: 30px;
   }
 }
 </style>

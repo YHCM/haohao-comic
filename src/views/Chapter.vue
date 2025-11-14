@@ -779,10 +779,6 @@ onUnmounted(() => {
     padding: 0 0;
   }
 
-  .comic-image {
-    /* max-height: calc(100vh - 200px); */
-  }
-
   .chapter-btn {
     padding: 0.7rem 1rem;
     font-size: 0.95rem;
@@ -820,10 +816,6 @@ onUnmounted(() => {
   .scroll-container {
     /* padding: 55px 0 65px 0; */
     padding: 0 0 0 0;
-  }
-
-  .comic-image {
-    /* max-height: calc(100vh - 180px); */
   }
 }
 </style>

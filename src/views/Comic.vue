@@ -6,7 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import ErrorIcon from '@/components/ErrorIcon.vue'
 import EmptyIcon from '@/components/EmptyIcon.vue'
 import SearchIcon from '@/components/SearchIcon.vue'
-// import LoadingIcon from '@/components/LoadingIcon.vue';
+import Logo from '@/components/Logo.vue' // 导入 Logo 组件
 
 // 初始化Turso数据库客户端（连接配置）
 const turso = createClient({
@@ -112,13 +112,6 @@ const handleChapterClick = (chapterId) => {
 }
 
 /**
- * 跳转到首页
- */
-const goToHome = () => {
-  router.push('/')
-}
-
-/**
  * 搜索表单提交处理
  * 带搜索参数跳转到首页，无参数则直接跳首页
  * @param {Event} e - 表单提交事件
@@ -150,8 +143,8 @@ onMounted(() => {
     <!-- 顶部导航栏：包含logo和搜索框 -->
     <header class="app-header">
       <div class="header-content">
-        <h1 class="app-title" @click="goToHome" style="cursor: pointer">好好漫画</h1>
-
+        <Logo class="app-logo" />
+        
         <form @submit="handleSearch" class="search-form">
           <input
             v-model="searchQuery"
@@ -267,11 +260,11 @@ onMounted(() => {
   gap: 1rem;
 }
 
-.app-title {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 1.8rem;
-  white-space: nowrap;
+/* Logo 样式 */
+.app-logo {
+  width: auto;
+  height: 40px;
+  cursor: pointer;
 }
 
 .search-form {
@@ -532,10 +525,6 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
 
-  .app-title {
-    font-size: 1.5rem;
-  }
-
   .header-content {
     padding: 0 1rem;
   }
@@ -543,6 +532,11 @@ onMounted(() => {
   .search-input {
     padding: 0.7rem;
     font-size: 0.9rem;
+  }
+
+  /* 调整手机端 Logo 大小 */
+  .app-logo {
+    height: 35px;
   }
 }
 
@@ -593,8 +587,9 @@ onMounted(() => {
     width: 100%;
   }
 
-  .app-title {
-    font-size: 1.4rem;
+  /* 手机端 Logo 进一步缩小 */
+  .app-logo {
+    height: 30px;
   }
 }
 
