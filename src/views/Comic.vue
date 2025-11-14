@@ -1,135 +1,66 @@
 <script setup>
-// 导入依赖：数据库客户端、Vue核心API、路由、自定义图标组件
-import { createClient } from '@libsql/client/web'
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ErrorIcon from '@/components/ErrorIcon.vue'
 import EmptyIcon from '@/components/EmptyIcon.vue'
 import SearchIcon from '@/components/SearchIcon.vue'
-import Logo from '@/components/Logo.vue' // 导入 Logo 组件
+import Logo from '@/components/Logo.vue'
+// 导入 Service 方法
+import { getComicById, getChaptersByComicId } from '@/services/comicService'
 
-// 初始化Turso数据库客户端（连接配置）
-const turso = createClient({
-  url: 'libsql://test-super-hao.aws-ap-northeast-1.turso.io',
-  authToken:
-    'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicm8iLCJpYXQiOjE3NjMwMDE0OTYsImlkIjoiOTQ0ZjQxMWEtMTkzNy00OTYxLWIwZjgtMTZmNDE5ZTIyYTk4IiwicmlkIjoiOGNkMzg2NDMtNzUxNy00MzQ1LWI3N2UtNDlmMjY5NDI3NTFmIn0.9QuHdkavaE6-9-pKqM33zJHGkO6S5tYwNzQdXAyLpy3GYWVj8AacsbTRmX14RSLmH7QLYnalRFZLBc-_1cnBCA',
-})
-
-// 路由相关：获取当前路由参数、路由跳转实例
+// 路由相关：保持不变
 const route = useRoute()
 const router = useRouter()
-const comicId = computed(() => route.params.comicId) // 漫画ID（从路由参数中获取）
-const searchQuery = ref('') // 搜索输入框绑定值
+const comicId = computed(() => route.params.comicId)
+const searchQuery = ref('')
 
-// 状态管理：页面核心数据和状态
-const comic = ref(null) // 漫画详情数据
-const chapters = ref([]) // 漫画章节列表
-const loading = ref(true) // 加载状态（true=加载中）
-const error = ref(null) // 错误信息（null=无错误）
+// 状态管理
+const comic = ref(null)
+const chapters = ref([])
+const loading = ref(true)
+const error = ref(null)
 
-/**
- * 日期格式化工具函数
- * @param {string} dateString - 原始日期字符串（如："2025-11-13 12:00:00"）
- * @returns {string} 格式化后的日期（只保留年月日，如："2025-11-13"）
- */
+// 日期格式化工具：保持不变
 const formatDate = (dateString) => {
   return dateString.split(' ')[0]
 }
 
-/**
- * 异步查询漫画详情
- * 从数据库中获取当前漫画ID对应的漫画信息
- */
-const fetchComicDetail = async () => {
-  try {
-    const response = await turso.execute({
-      sql: 'SELECT * FROM comics WHERE id = ?',
-      args: [comicId.value],
-    })
-
-    // 无查询结果时设置错误信息
-    if (response.rows.length === 0) {
-      error.value = '该漫画不存在或已被删除'
-      return
-    }
-
-    // 格式化查询结果（列名+行数据映射为对象）
-    comic.value = response.columns.reduce((obj, col, index) => {
-      obj[col] = response.rows[0][index]
-      return obj
-    }, {})
-  } catch (err) {
-    error.value = '加载漫画详情失败，请稍后再试'
-    console.error('漫画查询错误:', err)
-  }
-}
-
-/**
- * 异步查询漫画章节列表
- * 按章节编号升序获取当前漫画的所有章节
- */
-const fetchChapters = async () => {
-  try {
-    const response = await turso.execute({
-      sql: 'SELECT * FROM chapters WHERE comic_id = ? ORDER BY number ASC',
-      args: [comicId.value],
-    })
-
-    // 格式化查询结果（多行数据映射为对象数组）
-    chapters.value = response.rows.map((row) => {
-      return response.columns.reduce((obj, col, index) => {
-        obj[col] = row[index]
-        return obj
-      }, {})
-    })
-  } catch (err) {
-    error.value = '加载章节列表失败，请稍后再试'
-    console.error('章节查询错误:', err)
-  }
-}
-
-/**
- * 统一数据加载入口
- * 同时加载漫画详情和章节，控制加载状态
- */
+// 调用 Service
 const fetchData = async () => {
   loading.value = true
-  error.value = null // 重置错误信息
+  error.value = null
   try {
-    await Promise.all([fetchComicDetail(), fetchChapters()]) // 并行请求提升效率
+    // 并行调用 Service 方法
+    const [comicData, chaptersData] = await Promise.all([
+      getComicById(comicId.value),
+      getChaptersByComicId(comicId.value),
+    ])
+    comic.value = comicData
+    chapters.value = chaptersData
+  } catch (err) {
+    error.value = err.message // Service 抛出的错误信息
+    console.error('加载数据失败:', err)
   } finally {
-    loading.value = false // 无论成功失败，都结束加载状态
+    loading.value = false
   }
 }
 
-/**
- * 章节点击事件处理
- * 跳转到对应章节的阅读页面
- * @param {number} chapterId - 章节ID
- */
+// 章节点击、搜索提交
 const handleChapterClick = (chapterId) => {
   router.push(`/comic/${comicId.value}/chapter/${chapterId}`)
 }
 
-/**
- * 搜索表单提交处理
- * 带搜索参数跳转到首页，无参数则直接跳首页
- * @param {Event} e - 表单提交事件
- */
 const handleSearch = (e) => {
-  e.preventDefault() // 阻止表单默认提交行为
+  e.preventDefault()
   const query = searchQuery.value.trim()
   if (query) {
-    router.push({
-      path: '/',
-      query: { search: query },
-    })
+    router.push({ path: '/', query: { search: query } })
   } else {
     router.push('/')
   }
 }
 
-// 页面挂载时初始化：加载数据 + 回显搜索参数
+// 页面挂载：保持不变
 onMounted(() => {
   fetchData()
   if (route.query.search) {
@@ -144,7 +75,7 @@ onMounted(() => {
     <header class="app-header">
       <div class="header-content">
         <Logo class="app-logo" />
-        
+
         <form @submit="handleSearch" class="search-form">
           <input
             v-model="searchQuery"

@@ -1,47 +1,32 @@
 <script setup>
-// 保持原有脚本不变
-import { createClient } from '@libsql/client/web'
 import { ref, onMounted, computed } from 'vue'
 import SearchIcon from '@/components/SearchIcon.vue'
 import ErrorIcon from '@/components/ErrorIcon.vue'
 import EmptyIcon from '@/components/EmptyIcon.vue'
 import Logo from '@/components/Logo.vue'
+// 导入 Service 方法
+import { getAllComics, searchComicsByTitle } from '@/services/comicService'
 
-const turso = createClient({
-  url: 'libsql://test-super-hao.aws-ap-northeast-1.turso.io',
-  authToken:
-    'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicm8iLCJpYXQiOjE3NjMwMDE0OTYsImlkIjoiOTQ0ZjQxMWEtMTkzNy00OTYxLWIwZjgtMTZmNDE5ZTIyYTk4IiwicmlkIjoiOGNkMzg2NDMtNzUxNy00MzQ1LWI3N2UtNDlmMjY5NDI3NTFmIn0.9QuHdkavaE6-9-pKqM33zJHGkO6S5tYwNzQdXAyLpy3GYWVj8AacsbTRmX14RSLmH7QLYnalRFZLBc-_1cnBCA',
-})
-
-const rawData = ref(null)
+const comics = ref([]) // 直接存储格式化后的漫画列表
 const loading = ref(false)
 const error = ref(null)
 const searchQuery = ref('')
 
-const comics = computed(() => {
-  if (!rawData.value?.rows || !rawData.value?.columns) return []
-  return rawData.value.rows.map((row) => {
-    return rawData.value.columns.reduce((obj, col, index) => {
-      obj[col] = row[index]
-      return obj
-    }, {})
-  })
-})
-
 const filteredComics = computed(() => {
-  const query = searchQuery.value.trim().toLowerCase()
-  if (!query) return comics.value
-  return comics.value.filter((comic) => comic.title.toLowerCase().includes(query))
+  return comics.value
 })
 
-const fetchComics = async () => {
+// 替换原 fetchComics，支持搜索
+const fetchComics = async (keyword = '') => {
   try {
     loading.value = true
-    const response = await turso.execute('SELECT * FROM comics')
-    rawData.value = response
+    error.value = null
+    // 调用 Service：有关键词则搜索，无则获取全部
+    const data = await (keyword ? searchComicsByTitle(keyword) : getAllComics())
+    comics.value = data
   } catch (err) {
-    error.value = '加载漫画失败，请稍后再试'
-    console.error('数据库查询错误:', err)
+    error.value = err.message // Service 抛出的错误信息
+    console.error('加载漫画失败:', err)
   } finally {
     loading.value = false
   }
@@ -51,8 +36,10 @@ onMounted(() => {
   fetchComics()
 })
 
+// 搜索提交逻辑不变，改为调用带关键词的 fetchComics
 const handleSearch = (e) => {
   e.preventDefault()
+  fetchComics(searchQuery.value)
 }
 </script>
 
@@ -63,7 +50,7 @@ const handleSearch = (e) => {
       <!-- 内容容器：控制最大宽度，与漫画容器一致 -->
       <div class="header-content">
         <Logo class="app-logo" />
-        
+
         <!-- 搜索框 -->
         <form @submit="handleSearch" class="search-form">
           <input

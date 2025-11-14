@@ -1,5 +1,4 @@
 <script setup>
-import { createClient } from '@libsql/client/web'
 import { ref, onMounted, computed, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ErrorIcon from '@/components/ErrorIcon.vue'
@@ -10,193 +9,75 @@ import HomeIcon from '@/components/HomeIcon.vue'
 import BookIcon from '@/components/BookIcon.vue'
 import MoonIcon from '@/components/MoonIcon.vue'
 import SunIcon from '@/components/SunIcon.vue'
+// 导入 Service 方法
+import {
+  getChapterById,
+  getComicById,
+  getPagesByChapterId,
+  getAdjacentChapters,
+} from '@/services/comicService'
 
-// 初始化Turso数据库客户端
-const turso = createClient({
-  url: 'libsql://test-super-hao.aws-ap-northeast-1.turso.io',
-  authToken:
-    'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicm8iLCJpYXQiOjE3NjMwMDE0OTYsImlkIjoiOTQ0ZjQxMWEtMTkzNy00OTYxLWIwZjgtMTZmNDE5ZTIyYTk4IiwicmlkIjoiOGNkMzg2NDMtNzUxNy00MzQ1LWI3N2UtNDlmMjY5NDI3NTFmIn0.9QuHdkavaE6-9-pKqM33zJHGkO6S5tYwNzQdXAyLpy3GYWVj8AacsbTRmX14RSLmH7QLYnalRFZLBc-_1cnBCA',
-})
-
-// 路由相关
+// 路由相关：保持不变
 const route = useRoute()
 const router = useRouter()
 const chapterId = computed(() => {
   const id = route.params.chapterId
   return id ? String(id).trim() : ''
-}) // 当前章节ID（确保为字符串）
+})
 
-// 状态管理 - 新增主题模式状态
+// 状态管理
 const pages = ref([])
 const loading = ref(true)
 const error = ref(null)
-const toolbarVisible = ref(true) // 滚动模式默认显示工具栏，滚动时自动隐藏
+const toolbarVisible = ref(false) // 默认隐藏
 const chapterInfo = ref(null)
 const comicInfo = ref(null)
 const adjacentChapters = ref({ prev: null, next: null })
-// 主题模式：从localStorage读取，默认浅色模式（light）
 const themeMode = ref(localStorage.getItem('comicThemeMode') || 'light')
 
-// 计算属性
+// 计算属性：保持不变
 const hasPrevChapter = computed(() => !!adjacentChapters.value.prev)
 const hasNextChapter = computed(() => !!adjacentChapters.value.next)
-// 主题模式标识（用于绑定class）
 const isDarkMode = computed(() => themeMode.value === 'dark')
 
-// 切换主题模式（保存到localStorage）
+// 主题切换、点击控制、键盘导航
 const toggleThemeMode = () => {
   const newMode = themeMode.value === 'light' ? 'dark' : 'light'
   themeMode.value = newMode
   localStorage.setItem('comicThemeMode', newMode)
-  // 触发DOM更新，确保主题样式立即生效
   nextTick(() => {
     document.documentElement.classList.toggle('dark-mode', newMode === 'dark')
   })
 }
 
-// 点击控制逻辑，控制工具栏显示/隐藏
 const handleContentClick = () => {
   toolbarVisible.value = !toolbarVisible.value
 }
 
-// 键盘导航逻辑 - 改为滚动控制
 const handleKeydown = (e) => {
   const scrollContainer = document.querySelector('.scroll-container')
   if (!scrollContainer || pages.value.length === 0) return
 
-  try {
-    switch (e.key) {
-      case 'ArrowLeft': // 左方向键 = 上一章
-        goToPrevChapter()
-        break
-      case 'ArrowRight': // 右方向键 = 下一章
-        goToNextChapter()
-        break
-      case 'Home':
-        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' })
-        break
-      case 'End':
-        scrollContainer.scrollTo({
-          top: scrollContainer.scrollHeight,
-          behavior: 'smooth',
-        })
-        break
-      case 'Escape':
-        toolbarVisible.value = !toolbarVisible.value
-        break
-    }
-  } catch (err) {
-    // 移除控制台输出
+  switch (e.key) {
+    case 'ArrowLeft':
+      goToPrevChapter()
+      break
+    case 'ArrowRight':
+      goToNextChapter()
+      break
+    case 'Home':
+      scrollContainer.scrollTo({ top: 0, behavior: 'smooth' })
+      break
+    case 'End':
+      scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' })
+      break
+    case 'Escape':
+      toolbarVisible.value = !toolbarVisible.value
+      break
   }
 }
 
-// 数据加载函数
-const fetchChapterInfo = async () => {
-  try {
-    const id = chapterId.value
-    if (!id) throw new Error('章节ID为空')
-
-    const response = await turso.execute({
-      sql: 'SELECT id, comic_id, number, title FROM chapters WHERE id = ?',
-      args: [id],
-    })
-
-    if (response.rows.length === 0) throw new Error(`章节ID ${id} 不存在`)
-    const chapterData = response.columns.reduce((obj, col, i) => {
-      obj[col] = response.rows[0][i]
-      return obj
-    }, {})
-    chapterInfo.value = chapterData
-  } catch (err) {
-    const errMsg = '加载章节信息失败'
-    error.value = errMsg
-    throw err
-  }
-}
-
-const fetchComicInfo = async () => {
-  const comicId = chapterInfo.value?.comic_id
-  if (!comicId) {
-    comicInfo.value = { title: '未知漫画' }
-    return
-  }
-  try {
-    const response = await turso.execute({
-      sql: 'SELECT title FROM comics WHERE id = ?',
-      args: [comicId],
-    })
-    comicInfo.value =
-      response.rows.length > 0
-        ? { title: response.rows[0][0] || '未知漫画' }
-        : { title: '未知漫画' }
-  } catch (err) {
-    comicInfo.value = { title: '未知漫画' }
-  }
-}
-
-const fetchChapterPages = async () => {
-  try {
-    const chapterId = chapterInfo.value?.id
-    if (!chapterId) throw new Error('章节ID未获取到')
-
-    const response = await turso.execute({
-      sql: 'SELECT id, image, number FROM pages WHERE chapter_id = ? ORDER BY number ASC',
-      args: [chapterId],
-    })
-
-    let pageList = response.rows.map((row) =>
-      response.columns.reduce((obj, col, i) => {
-        obj[col] = row[i]
-        return obj
-      }, {}),
-    )
-
-    // 过滤无效图片
-    pageList = pageList.filter((page) => {
-      const isImageValid =
-        page.image &&
-        typeof page.image === 'string' &&
-        page.image.trim() &&
-        (page.image.startsWith('http://') || page.image.startsWith('https://'))
-      return isImageValid
-    })
-
-    pages.value = pageList
-
-    if (pages.value.length === 0) error.value = '该章节暂无有效图片内容'
-  } catch (err) {
-    const errMsg = '加载漫画图片失败'
-    error.value = errMsg
-    throw err
-  }
-}
-
-const fetchAdjacentChapters = async () => {
-  try {
-    const { comic_id, number } = chapterInfo.value || {}
-    if (!comic_id || number === undefined) throw new Error('漫画ID或章节序号未获取到')
-
-    const [prevRes, nextRes] = await Promise.all([
-      turso.execute({
-        sql: 'SELECT id, number FROM chapters WHERE comic_id = ? AND number = ?',
-        args: [comic_id, number - 1],
-      }),
-      turso.execute({
-        sql: 'SELECT id, number FROM chapters WHERE comic_id = ? AND number = ?',
-        args: [comic_id, number + 1],
-      }),
-    ])
-
-    adjacentChapters.value.prev =
-      prevRes.rows.length > 0 ? { id: prevRes.rows[0][0], number: prevRes.rows[0][1] } : null
-    adjacentChapters.value.next =
-      nextRes.rows.length > 0 ? { id: nextRes.rows[0][0], number: nextRes.rows[0][1] } : null
-  } catch (err) {
-    // 移除控制台输出
-  }
-}
-
-// 核心加载函数
+// 数据加载函数，调用 Service
 const fetchData = async () => {
   loading.value = true
   error.value = null
@@ -205,29 +86,39 @@ const fetchData = async () => {
   adjacentChapters.value = { prev: null, next: null }
 
   try {
-    await fetchChapterInfo()
-    await Promise.all([fetchComicInfo(), fetchChapterPages(), fetchAdjacentChapters()])
+    // 1. 获取章节基本信息
+    const chapterData = await getChapterById(chapterId.value)
+    chapterInfo.value = chapterData
+
+    // 2. 并行获取：漫画信息、章节图片、相邻章节
+    const [comicData, pagesData, adjacentData] = await Promise.all([
+      getComicById(chapterData.comic_id),
+      getPagesByChapterId(chapterData.id),
+      getAdjacentChapters(chapterData.comic_id, chapterData.number),
+    ])
+
+    comicInfo.value = comicData
+    pages.value = pagesData
+    adjacentChapters.value = adjacentData
+
+    // 检查图片是否为空
+    if (pages.value.length === 0) error.value = '该章节暂无有效图片内容'
   } catch (err) {
-    error.value = '数据加载失败，请重试'
+    error.value = err.message // Service 抛出的错误信息
   } finally {
     loading.value = false
   }
 }
 
-// 导航功能 - 保持不变
+// 导航功能、监听、生命周期：保持不变
 const goToPrevChapter = () => {
   try {
     const { prev } = adjacentChapters.value
     const comicId = chapterInfo.value?.comic_id
     if (prev && comicId) {
-      router.push({
-        path: `/comic/${comicId}/chapter/${prev.id}`,
-        replace: true,
-      })
+      router.push({ path: `/comic/${comicId}/chapter/${prev.id}`, replace: true })
     }
-  } catch (err) {
-    // 移除控制台输出
-  }
+  } catch (err) {}
 }
 
 const goToNextChapter = () => {
@@ -235,54 +126,42 @@ const goToNextChapter = () => {
     const { next } = adjacentChapters.value
     const comicId = chapterInfo.value?.comic_id
     if (next && comicId) {
-      router.push({
-        path: `/comic/${comicId}/chapter/${next.id}`,
-        replace: true,
-      })
+      router.push({ path: `/comic/${comicId}/chapter/${next.id}`, replace: true })
     }
-  } catch (err) {
-    // 移除控制台输出
-  }
+  } catch (err) {}
 }
 
 const goToChapterList = () => {
   try {
     const comicId = chapterInfo.value?.comic_id
     if (comicId) router.push(`/comic/${comicId}`)
-  } catch (err) {
-    // 移除控制台输出
-  }
+  } catch (err) {}
 }
 
 const goToHome = () => {
   try {
     router.push('/')
-  } catch (err) {
-    // 移除控制台输出
-  }
+  } catch (err) {}
 }
 
-// 监听章节ID变化，重新加载数据
 watch(
   chapterId,
   (newId, oldId) => {
     if (newId && newId !== oldId) {
-      fetchData() // 路由变化时重新加载新章节数据
+      fetchData()
     }
   },
   { immediate: false },
 )
 
-// 监听主题模式变化，同步DOM class
 watch(
   themeMode,
   (newMode) => {
     document.documentElement.classList.toggle('dark-mode', newMode === 'dark')
   },
   { immediate: true },
-) // 初始化时立即应用主题
+)
 
-// 生命周期钩子 - 新增滚动监听
 onMounted(() => {
   nextTick(() => {
     if (!chapterId.value) {
@@ -293,8 +172,6 @@ onMounted(() => {
   })
 
   window.addEventListener('keydown', handleKeydown)
-
-  // 初始化主题样式
   document.documentElement.classList.toggle('dark-mode', themeMode.value === 'dark')
 })
 
