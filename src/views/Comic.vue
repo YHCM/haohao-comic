@@ -191,7 +191,7 @@ onMounted(() => {
           <div class="comic-meta">
             <h2 class="comic-title">{{ comic.title }}</h2>
             <div class="meta-item">
-              <span class="meta-label">发布日期：</span>
+              <span class="meta-label">收录日期：</span>
               <span class="meta-value">{{ formatDate(comic.created_at) }}</span>
             </div>
             <div class="meta-item">

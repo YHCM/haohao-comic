@@ -1,16 +1,15 @@
 <script setup>
-// 导入依赖：数据库客户端、Vue核心API、路由、自定义图标
 import { createClient } from '@libsql/client/web'
 import { ref, onMounted, computed, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ErrorIcon from '@/components/ErrorIcon.vue'
 import EmptyIcon from '@/components/EmptyIcon.vue'
-import ChevronLeftIcon from '@/components/ChevronLeftIcon.vue' // 左箭头
-import ChevronRightIcon from '@/components/ChevronRightIcon.vue' // 右箭头
-import HomeIcon from '@/components/HomeIcon.vue' // 首页图标
-import BookIcon from '@/components/BookIcon.vue' // 章节列表图标
-import MoonIcon from '@/components/MoonIcon.vue' // 暗色模式图标
-import SunIcon from '@/components/SunIcon.vue' // 浅色模式图标
+import ChevronLeftIcon from '@/components/ChevronLeftIcon.vue'
+import ChevronRightIcon from '@/components/ChevronRightIcon.vue'
+import HomeIcon from '@/components/HomeIcon.vue'
+import BookIcon from '@/components/BookIcon.vue'
+import MoonIcon from '@/components/MoonIcon.vue'
+import SunIcon from '@/components/SunIcon.vue'
 
 // 初始化Turso数据库客户端
 const turso = createClient({
@@ -27,35 +26,20 @@ const chapterId = computed(() => {
   return id ? String(id).trim() : ''
 }) // 当前章节ID（确保为字符串）
 
-const searchQuery = ref('') // 搜索框绑定值
-const searchInputRef = ref(null) // 搜索输入框ref（用于动态焦点控制）
-
 // 状态管理 - 新增主题模式状态
 const pages = ref([])
 const loading = ref(true)
 const error = ref(null)
 const toolbarVisible = ref(true) // 滚动模式默认显示工具栏，滚动时自动隐藏
-const isFullScreen = ref(false)
 const chapterInfo = ref(null)
 const comicInfo = ref(null)
 const adjacentChapters = ref({ prev: null, next: null })
-const searchVisible = ref(false)
-const lastScrollTop = ref(0) // 记录滚动位置，用于判断滚动方向
 // 主题模式：从localStorage读取，默认浅色模式（light）
 const themeMode = ref(localStorage.getItem('comicThemeMode') || 'light')
 
-// 计算属性 - 简化，只保留必要的
-const totalPages = computed(() => pages.value.length)
+// 计算属性
 const hasPrevChapter = computed(() => !!adjacentChapters.value.prev)
 const hasNextChapter = computed(() => !!adjacentChapters.value.next)
-const scrollProgress = computed(() => {
-  if (pages.value.length === 0) return 0
-  const scrollContainer = document.querySelector('.scroll-container')
-  if (!scrollContainer) return 0
-  const scrollTop = scrollContainer.scrollTop
-  const scrollHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight
-  return scrollHeight > 0 ? Math.round((scrollTop / scrollHeight) * 100) : 0
-})
 // 主题模式标识（用于绑定class）
 const isDarkMode = computed(() => themeMode.value === 'dark')
 
@@ -70,25 +54,9 @@ const toggleThemeMode = () => {
   })
 }
 
-// 点击控制逻辑 - 简化，只控制工具栏显示/隐藏
+// 点击控制逻辑，控制工具栏显示/隐藏
 const handleContentClick = () => {
   toolbarVisible.value = !toolbarVisible.value
-  searchVisible.value = false
-}
-
-// 滚动监听 - 滚动时隐藏工具栏，停止滚动3秒后显示
-let scrollTimer = null
-const handleScroll = () => {
-  toolbarVisible.value = false
-  searchVisible.value = false
-
-  // 清除之前的定时器
-  if (scrollTimer) clearTimeout(scrollTimer)
-
-  // 3秒后自动显示工具栏
-  scrollTimer = setTimeout(() => {
-    toolbarVisible.value = true
-  }, 3000)
 }
 
 // 键盘导航逻辑 - 改为滚动控制
@@ -115,8 +83,6 @@ const handleKeydown = (e) => {
         break
       case 'Escape':
         toolbarVisible.value = !toolbarVisible.value
-        searchVisible.value = false
-        document.fullscreenElement && document.exitFullscreen()
         break
     }
   } catch (err) {
@@ -124,12 +90,7 @@ const handleKeydown = (e) => {
   }
 }
 
-// 全屏变化监听
-const handleFullscreenChange = () => {
-  isFullScreen.value = !!document.fullscreenElement
-}
-
-// 数据加载函数 - 保持不变（移除所有console）
+// 数据加载函数
 const fetchChapterInfo = async () => {
   try {
     const id = chapterId.value
@@ -301,35 +262,7 @@ const goToHome = () => {
   }
 }
 
-// 搜索功能 - 保持不变
-const toggleSearch = () => {
-  searchVisible.value = !searchVisible.value
-}
-
-const handleSearch = (e) => {
-  e.preventDefault()
-  const query = searchQuery.value.trim()
-  try {
-    if (query) {
-      router.push({ path: '/', query: { search: query } })
-    } else {
-      router.push('/')
-    }
-  } catch (err) {
-    // 移除控制台输出
-  }
-}
-
-// 监听搜索框显示状态
-watch(searchVisible, (isVisible) => {
-  if (isVisible && searchInputRef.value) {
-    nextTick(() => {
-      searchInputRef.value.focus().catch((err) => {}) // 移除控制台警告
-    })
-  }
-})
-
-// 监听章节ID变化，重新加载数据（关键修复）
+// 监听章节ID变化，重新加载数据
 watch(
   chapterId,
   (newId, oldId) => {
@@ -349,19 +282,6 @@ watch(
   { immediate: true },
 ) // 初始化时立即应用主题
 
-// 全屏功能 - 保持不变（但工具栏不再显示该按钮）
-const toggleFullScreen = () => {
-  try {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((err) => {}) // 移除控制台输出
-    } else {
-      document.exitFullscreen()
-    }
-  } catch (err) {
-    // 移除控制台输出
-  }
-}
-
 // 生命周期钩子 - 新增滚动监听
 onMounted(() => {
   nextTick(() => {
@@ -373,18 +293,6 @@ onMounted(() => {
   })
 
   window.addEventListener('keydown', handleKeydown)
-  window.addEventListener('fullscreenchange', handleFullscreenChange)
-
-  // 监听滚动容器的滚动事件
-  const scrollContainer = document.querySelector('.scroll-container')
-  if (scrollContainer) {
-    scrollContainer.addEventListener('scroll', handleScroll)
-  }
-
-  // 初始化搜索框值
-  if (route.query.search) {
-    searchQuery.value = String(route.query.search).trim()
-  }
 
   // 初始化主题样式
   document.documentElement.classList.toggle('dark-mode', themeMode.value === 'dark')
@@ -392,22 +300,12 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
-  window.removeEventListener('fullscreenchange', handleFullscreenChange)
-
-  // 移除滚动监听
-  const scrollContainer = document.querySelector('.scroll-container')
-  if (scrollContainer) {
-    scrollContainer.removeEventListener('scroll', handleScroll)
-  }
-
-  // 清除定时器
-  if (scrollTimer) clearTimeout(scrollTimer)
 })
 </script>
 
 <template>
   <div class="comic-reader" :class="isDarkMode ? 'dark-mode' : 'light-mode'">
-    <!-- 顶部工具栏：默认显示，滚动时隐藏 -->
+    <!-- 顶部工具栏：默认显示 -->
     <header class="reader-header" :class="{ visible: toolbarVisible }" v-if="chapterInfo">
       <div class="header-content">
         <div class="header-left">
@@ -492,7 +390,7 @@ onUnmounted(() => {
       </div>
     </main>
 
-    <!-- 底部工具栏：精简版（移除进度显示、全屏、刷新按钮） -->
+    <!-- 底部工具栏 -->
     <footer class="reader-toolbar" :class="{ visible: toolbarVisible }" v-if="chapterInfo">
       <div class="toolbar-content">
         <button
@@ -685,70 +583,6 @@ onUnmounted(() => {
 
 .theme-toggle-btn:hover {
   background-color: var(--btn-bg-hover);
-}
-
-/* 右侧搜索区域（保持原有样式，如需启用可取消注释） */
-.search-toggle-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-primary);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.search-toggle-btn:hover {
-  background-color: var(--btn-bg-hover);
-}
-
-/* 搜索框 */
-.search-form {
-  display: flex;
-  gap: 0.5rem;
-  background-color: var(--btn-bg);
-  border-radius: 8px;
-  padding: 0.3rem;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.3s ease;
-}
-
-.search-form.visible {
-  transform: scaleX(1);
-}
-
-.search-input {
-  background: transparent;
-  border: none;
-  color: var(--text-primary);
-  padding: 0.5rem 0.8rem;
-  font-size: 0.9rem;
-  width: 200px;
-  outline: none;
-}
-
-.search-input::placeholder {
-  color: var(--text-tertiary);
-}
-
-.search-btn {
-  background-color: var(--accent-color);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.search-btn:hover {
-  background-color: #359469;
 }
 
 /* 主阅读区：滚动容器 */
@@ -981,10 +815,6 @@ onUnmounted(() => {
 
   .chapter-name {
     font-size: 0.85rem;
-  }
-
-  .search-input {
-    width: 150px;
   }
 
   .toolbar-content {
