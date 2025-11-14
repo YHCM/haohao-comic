@@ -1,13 +1,14 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router' // 新增：导入路由钩子
 import SearchIcon from '@/components/SearchIcon.vue'
 import ErrorIcon from '@/components/ErrorIcon.vue'
 import EmptyIcon from '@/components/EmptyIcon.vue'
 import Logo from '@/components/Logo.vue'
-// 导入 Service 方法
 import { getAllComics, searchComicsByTitle } from '@/services/comicService'
 
-const comics = ref([]) // 直接存储格式化后的漫画列表
+const route = useRoute() // 获取当前路由实例
+const comics = ref([])
 const loading = ref(false)
 const error = ref(null)
 const searchQuery = ref('')
@@ -16,27 +17,34 @@ const filteredComics = computed(() => {
   return comics.value
 })
 
-// 替换原 fetchComics，支持搜索
+// 搜索核心逻辑
 const fetchComics = async (keyword = '') => {
+  const trimmedKeyword = keyword.trim()
   try {
     loading.value = true
     error.value = null
-    // 调用 Service：有关键词则搜索，无则获取全部
-    const data = await (keyword ? searchComicsByTitle(keyword) : getAllComics())
+    const data = await (trimmedKeyword ? searchComicsByTitle(keyword) : getAllComics())
     comics.value = data
   } catch (err) {
-    error.value = err.message // Service 抛出的错误信息
+    error.value = err.message
     console.error('加载漫画失败:', err)
   } finally {
     loading.value = false
   }
 }
 
-onMounted(() => {
-  fetchComics()
-})
+// 新增：监听路由search参数变化，自动触发搜索
+watch(
+  () => route.query.search, // 监听路由上的search参数
+  (newSearchVal) => {
+    const keyword = newSearchVal?.trim() || ''
+    searchQuery.value = keyword // 同步参数到搜索输入框
+    fetchComics(keyword) // 触发搜索
+  },
+  { immediate: true } // 初始挂载时就执行一次（处理页面刷新时的参数）
+)
 
-// 搜索提交逻辑不变，改为调用带关键词的 fetchComics
+// 表单提交搜索
 const handleSearch = (e) => {
   e.preventDefault()
   fetchComics(searchQuery.value)
