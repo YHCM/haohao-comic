@@ -19,8 +19,12 @@ const comic = ref(null)
 const chapters = ref([])
 const loading = ref(true)
 const error = ref(null)
+// 暗色模式
+const themeMode = ref(localStorage.getItem('comicThemeMode') || 'light')
 
-// 日期格式化工具：保持不变
+const isDarkMode = computed(() => themeMode.value === 'dark')
+
+// 日期格式化工具
 const formatDate = (dateString) => {
   return dateString.split(' ')[0]
 }
@@ -70,7 +74,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="comic-app">
+  <div class="comic-app" :class="isDarkMode ? 'dark-mode' : 'light-mode'">
     <!-- 顶部导航栏：包含logo和搜索框 -->
     <header class="app-header">
       <div class="header-content">
@@ -157,25 +161,31 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 全局容器样式：页面整体布局 */
+/* 全局容器样式 */
 .comic-app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f8f9fa;
-  color: #333;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
-/* 顶部导航栏样式 */
+/* 顶部导航栏 */
 .app-header {
-  background-color: #fff;
+  background-color: var(--bg-toolbar);
   padding: 1rem 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   width: 100%;
   position: sticky;
   top: 0;
   z-index: 100;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .header-content {
@@ -189,13 +199,13 @@ onMounted(() => {
   gap: 1rem;
 }
 
-/* Logo 样式 */
 .app-logo {
   width: auto;
   height: 40px;
   cursor: pointer;
 }
 
+/* 搜索框样式 */
 .search-form {
   display: flex;
   flex: 1;
@@ -207,20 +217,29 @@ onMounted(() => {
 .search-input {
   flex: 1;
   padding: 0.8rem 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.3s;
+  transition:
+    border-color 0.3s,
+    background-color 0.3s,
+    color 0.3s;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #42b983;
+  border-color: var(--accent-color);
   box-shadow: 0 0 0 2px rgba(66, 185, 131, 0.1);
 }
 
+.search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
 .search-btn {
-  background-color: #42b983;
+  background-color: var(--accent-color);
   color: white;
   border: none;
   border-radius: 8px;
@@ -233,10 +252,10 @@ onMounted(() => {
 }
 
 .search-btn:hover {
-  background-color: #359469;
+  background-color: #359469; /* 深色模式下保持一致的hover色 */
 }
 
-/* 主内容区样式 */
+/* 主内容区 */
 .detail-container {
   flex: 1;
   padding: 2rem;
@@ -245,7 +264,7 @@ onMounted(() => {
   width: 100%;
 }
 
-/* 加载状态样式 */
+/* 加载状态 */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -253,20 +272,19 @@ onMounted(() => {
   justify-content: center;
   height: 60vh;
   gap: 1.5rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
-/* 加载动画容器 */
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #42b983;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--accent-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
-/* 错误状态样式 */
+/* 错误状态 */
 .error-state {
   display: flex;
   flex-direction: column;
@@ -279,7 +297,7 @@ onMounted(() => {
 }
 
 .retry-btn {
-  background-color: #42b983;
+  background-color: var(--accent-color);
   color: white;
   border: none;
   border-radius: 8px;
@@ -293,7 +311,7 @@ onMounted(() => {
   background-color: #359469;
 }
 
-/* 详情内容样式 */
+/* 详情内容容器 */
 .detail-content {
   display: flex;
   flex-direction: column;
@@ -304,14 +322,41 @@ onMounted(() => {
 .comic-info-section {
   display: flex;
   gap: 2rem;
-  background-color: #fff;
+  background-color: var(--bg-toolbar);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   align-items: flex-start;
-  /* 小屏幕纵向排列 */
   flex-wrap: wrap;
   justify-content: center;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* 章节列表区域 */
+.chapters-section {
+  background-color: var(--bg-toolbar);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* 暗色模式下增强阴影 */
+.dark-mode .comic-info-section,
+.dark-mode .chapters-section {
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .app-header {
+  box-shadow: 0 2px 12px rgba(255, 255, 255, 0.2);
 }
 
 .comic-cover-wrapper {
@@ -337,7 +382,7 @@ onMounted(() => {
 .comic-title {
   margin: 0;
   font-size: 2rem;
-  color: #2c3e50;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
@@ -349,32 +394,24 @@ onMounted(() => {
 }
 
 .meta-label {
-  color: #7f8c8d;
+  color: var(--text-tertiary);
   font-weight: 500;
 }
 
 .meta-value {
-  color: #333;
-}
-
-/* 章节列表区域 */
-.chapters-section {
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
 }
 
 .section-title {
   margin: 0 0 1.5rem 0;
   font-size: 1.5rem;
-  color: #2c3e50;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-/* 无章节数据样式 */
+/* 无章节数据 */
 .empty-chapters {
   display: flex;
   flex-direction: column;
@@ -382,10 +419,10 @@ onMounted(() => {
   justify-content: center;
   height: 30vh;
   gap: 1rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
-/* 章节列表样式 */
+/* 章节列表 */
 .chapters-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -397,23 +434,24 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 1.2rem 1.5rem;
-  background-color: #f8f9fa;
+  background-color: var(--btn-bg);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s;
   border: 1px solid transparent;
+  color: var(--btn-text);
 }
 
 .chapter-item:hover {
-  background-color: #f0f7f3;
-  border-color: #e1f5ea;
+  background-color: var(--btn-bg-hover);
+  border-color: var(--accent-color);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
 .chapter-title {
   flex: 1;
-  color: #333;
+  color: var(--btn-text);
   font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
@@ -421,16 +459,21 @@ onMounted(() => {
   margin: 0 1rem;
 }
 
-/* 页脚样式 */
+/* 页脚 */
 .app-footer {
-  background-color: #2c3e50;
-  color: #ecf0f1;
+  background-color: var(--bg-footer);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-footer);
   text-align: center;
   padding: 1rem;
   margin-top: auto;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
 }
 
-/* 响应式样式：适配不同屏幕尺寸 */
+/* 响应式样式 */
 @media (max-width: 768px) {
   .detail-container {
     padding: 1rem;
@@ -450,7 +493,6 @@ onMounted(() => {
     font-size: 0.9rem;
   }
 
-  /* 调整手机端 Logo 大小 */
   .app-logo {
     height: 35px;
   }
@@ -469,7 +511,7 @@ onMounted(() => {
   }
 
   .comic-cover {
-    width: 180px; /* 缩小移动端封面宽度 */
+    width: 180px;
     height: 240px;
   }
 
@@ -477,7 +519,7 @@ onMounted(() => {
     width: 100%;
     gap: 1rem;
     padding-top: 0;
-    text-align: center; /* 移动端信息居中 */
+    text-align: center;
   }
 
   .comic-title {
@@ -485,7 +527,7 @@ onMounted(() => {
   }
 
   .meta-item {
-    justify-content: center; /* 标签和值居中对齐 */
+    justify-content: center;
   }
 
   .chapters-section {
@@ -511,13 +553,12 @@ onMounted(() => {
     width: 100%;
   }
 
-  /* 手机端 Logo 进一步缩小 */
   .app-logo {
     height: 30px;
   }
 }
 
-/* 加载动画：旋转效果 */
+/* 加载动画 */
 @keyframes spin {
   0% {
     transform: rotate(0deg);

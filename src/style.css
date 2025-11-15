@@ -11,9 +11,11 @@
   --accent-color: #42b983;
   --bg-primary: #f8f9fa;
   --bg-toolbar: #fff;
+  --bg-footer: #2c3e50;
   --text-primary: #333;
   --text-secondary: #666;
   --text-tertiary: #999;
+  --text-footer: #ecf0f1;
   --border-color: #eee;
   --btn-bg: #f0f0f0;
   --btn-bg-hover: #e0e0e0;
@@ -27,9 +29,11 @@
 .dark-mode {
   --accent-color: #42b983;
   --bg-primary: #000;
+  --bg-footer: #1e2a38;
   --bg-toolbar: rgba(0, 0, 0, 0.8);
   --text-primary: #fff;
   --text-secondary: #ccc;
+  --text-footer: #c8d6e5;
   --border-color: #333;
   --btn-bg: rgba(255, 255, 255, 0.1);
   --btn-bg-hover: rgba(255, 255, 255, 0.2);

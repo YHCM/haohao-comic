@@ -12,6 +12,10 @@ const comics = ref([])
 const loading = ref(false)
 const error = ref(null)
 const searchQuery = ref('')
+// 暗色模式
+const themeMode = ref(localStorage.getItem('comicThemeMode') || 'light')
+
+const isDarkMode = computed(() => themeMode.value === 'dark')
 
 const filteredComics = computed(() => {
   return comics.value
@@ -33,7 +37,7 @@ const fetchComics = async (keyword = '') => {
   }
 }
 
-// 新增：监听路由search参数变化，自动触发搜索
+// 监听路由search参数变化，自动触发搜索
 watch(
   () => route.query.search, // 监听路由上的search参数
   (newSearchVal) => {
@@ -52,7 +56,7 @@ const handleSearch = (e) => {
 </script>
 
 <template>
-  <div class="comic-app">
+  <div class="comic-app" :class="isDarkMode ? 'dark-mode' : 'light-mode'">
     <!-- 顶部导航栏：全屏宽度，内容居中 -->
     <header class="app-header">
       <!-- 内容容器：控制最大宽度，与漫画容器一致 -->
@@ -122,20 +126,31 @@ const handleSearch = (e) => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f8f9fa;
-  color: #333;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
-/* 头部样式：添加 Logo 相关样式 */
+/* 头部样式 */
 .app-header {
-  background-color: #fff;
+  background-color: var(--bg-toolbar);
   padding: 1rem 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   width: 100%;
   position: sticky;
   top: 0;
   z-index: 100;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* 暗色模式下增强导航栏阴影 */
+.dark-mode .app-header {
+  box-shadow: 0 2px 12px rgba(255, 255, 255, 0.2);
 }
 
 .header-content {
@@ -151,13 +166,12 @@ const handleSearch = (e) => {
 
 /* Logo 样式：根据实际 Logo 大小调整，确保适配布局 */
 .app-logo {
-  /* 可根据 Logo 实际尺寸调整，这里提供默认适配 */
   width: auto;
   height: 40px; /* 控制 Logo 高度，避免过大 */
   cursor: pointer; /* 保持指针样式，提示可点击 */
 }
 
-/* 搜索框样式（保持不变） */
+/* 搜索框样式 */
 .search-form {
   display: flex;
   flex: 1;
@@ -169,20 +183,29 @@ const handleSearch = (e) => {
 .search-input {
   flex: 1;
   padding: 0.8rem 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.3s;
+  transition:
+    border-color 0.3s,
+    background-color 0.3s,
+    color 0.3s;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #42b983;
+  border-color: var(--accent-color);
   box-shadow: 0 0 0 2px rgba(66, 185, 131, 0.1);
 }
 
+.search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
 .search-btn {
-  background-color: #42b983;
+  background-color: var(--accent-color);
   color: white;
   border: none;
   border-radius: 8px;
@@ -214,14 +237,14 @@ const handleSearch = (e) => {
   justify-content: center;
   height: 40vh;
   gap: 1rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #42b983;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--accent-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -229,7 +252,7 @@ const handleSearch = (e) => {
 .loading-icon {
   width: 50px;
   height: 50px;
-  color: #42b983;
+  color: var(--accent-color);
 }
 
 @keyframes spin {
@@ -259,7 +282,7 @@ const handleSearch = (e) => {
   justify-content: center;
   height: 40vh;
   gap: 1rem;
-  color: #666;
+  color: var(--text-secondary);
   text-align: center;
 }
 
@@ -271,29 +294,44 @@ const handleSearch = (e) => {
 }
 
 .comic-card {
-  background-color: #fff;
+  background-color: var(--bg-toolbar);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition:
     transform 0.3s,
-    box-shadow 0.3s;
+    box-shadow 0.3s,
+    background-color 0.3s ease,
+    border-color 0.3s ease;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
+/* 暗色模式下卡片阴影优化 */
+.dark-mode .comic-card {
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+}
+
 .comic-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: var(--accent-color);
+}
+
+/* 暗色模式下 hover 阴影优化 */
+.dark-mode .comic-card:hover {
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
 }
 
 .comic-cover {
   position: relative;
   padding-top: 133%;
   overflow: hidden;
-  background-color: #f0f0f0;
+  background-color: var(--border-color);
+  transition: background-color 0.3s ease;
 }
 
 .cover-image {
@@ -304,6 +342,8 @@ const handleSearch = (e) => {
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s;
+  transform: scale(1.01);
+  transform-origin: center;
 }
 
 .comic-card:hover .cover-image {
@@ -320,26 +360,33 @@ const handleSearch = (e) => {
 .comic-title {
   margin: 0 0 0.5rem;
   font-size: 1.1rem;
-  color: #2c3e50;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color 0.3s ease;
 }
 
 .comic-date {
   margin: 0;
   font-size: 0.85rem;
-  color: #7f8c8d;
+  color: var(--text-tertiary);
   margin-top: auto;
+  transition: color 0.3s ease;
 }
 
 /* 页脚样式 */
 .app-footer {
-  background-color: #2c3e50;
-  color: #ecf0f1;
+  background-color: var(--bg-footer);
+  color: var(--text-footer);
   text-align: center;
   padding: 1rem;
   margin-top: auto;
+  border-top: 1px solid var(--border-color);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 /* 响应式调整：优化 Logo 在手机端的显示 */
