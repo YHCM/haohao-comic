@@ -342,7 +342,7 @@ const handleSearch = (e) => {
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s;
-  transform: scale(1.01);
+  transform: scale(1.01); /* 避免黑线 */
   transform-origin: center;
 }
 

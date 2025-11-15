@@ -436,7 +436,7 @@ onUnmounted(() => {
 }
 
 /* 滚动条美化（使用CSS变量） */
-.scroll-container::-webkit-scrollbar {
+/* .scroll-container::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
@@ -452,7 +452,7 @@ onUnmounted(() => {
 
 .scroll-container::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
-}
+} */
 
 /* 漫画滚动内容：居中显示 */
 .comic-scroll-content {

@@ -361,14 +361,22 @@ onMounted(() => {
 
 .comic-cover-wrapper {
   flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .comic-cover {
   width: 240px;
   height: 320px;
   object-fit: cover;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.5s ease;
+  transform: scale(1.01); /* 去掉黑线 */
+  transform-origin: center;
+  display: block;
+  border: none;
 }
 
 .comic-meta {
