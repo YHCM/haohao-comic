@@ -17,6 +17,12 @@ import {
   getAdjacentChapters,
 } from '@/services/comicService'
 
+// 导入占位图
+import LightLoading from '@/assets/light-loading.svg'
+import DarkLoading from '@/assets/dark-loading.svg'
+import LightError from '@/assets/light-error.svg'
+import DarkError from '@/assets/dark-error.svg'
+
 // 路由相关：保持不变
 const route = useRoute()
 const router = useRouter()
@@ -250,17 +256,11 @@ onUnmounted(() => {
           <!-- 遍历所有漫画页，纵向排列 -->
           <div v-for="(page, index) in pages" :key="page.id || index" class="comic-page-item">
             <img
-              :src="
-                isDarkMode
-                  ? `https://placehold.co/800x1200/333333/FFFFFF?text=${index + 1} page loading`
-                  : `https://placehold.co/800x1200/F8F9FA/666666?text=${index + 1} page loading`
-              "
+              :src="isDarkMode ? DarkLoading : LightLoading"
               @load="(e) => (e.target.src = page.image)"
               @error="
                 (e) => {
-                  e.target.src = isDarkMode
-                    ? `https://placehold.co/800x1200/333333/FFFFFF?text=${index + 1} page error`
-                    : `https://placehold.co/800x1200/F8F9FA/666666?text=${index + 1} page error`
+                  e.target.src = isDarkMode ? DarkError : LightError
                 }
               "
               :alt="`第 ${index + 1} 页`"
