@@ -363,9 +363,9 @@ onMounted(() => {
   flex-shrink: 0;
   overflow: hidden;
   border-radius: 8px;
-  padding: 0;
-  margin: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: fit-content; /* 仅包裹内容宽度 */
+  margin: 0 auto; /* 移动端居中时保证水平居中 */
 }
 
 .comic-cover {
@@ -433,7 +433,7 @@ onMounted(() => {
 /* 章节列表 */
 .chapters-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1rem;
 }
 
@@ -512,11 +512,11 @@ onMounted(() => {
     gap: 1.2rem;
   }
 
-  .comic-cover-wrapper {
+  /* .comic-cover-wrapper {
     width: 100%;
     display: flex;
     justify-content: center;
-  }
+  } */
 
   .comic-cover {
     width: 180px;
