@@ -104,7 +104,7 @@ const fetchData = async () => {
     ])
 
     comicInfo.value = comicData
-    pages.value = pagesData
+    pages.value = pagesData.map((page) => ({ ...page, loaded: false, error: false }))
     adjacentChapters.value = adjacentData
 
     // 检查图片是否为空
@@ -256,11 +256,25 @@ onUnmounted(() => {
           <!-- 遍历所有漫画页，纵向排列 -->
           <div v-for="(page, index) in pages" :key="page.id || index" class="comic-page-item">
             <img
-              :src="isDarkMode ? DarkLoading : LightLoading"
-              @load.once="(e) => (e.target.src = page.image)"
-              @error.once="
+              :src="
+                page.loaded
+                  ? page.image
+                  : page.error
+                    ? isDarkMode
+                      ? DarkError
+                      : LightError
+                    : isDarkMode
+                      ? DarkLoading
+                      : LightLoading
+              "
+              @load="
+                (e) =>
+                  !page.loaded && !page.error && ((e.target.src = page.image), (page.loaded = true))
+              "
+              @error="
                 (e) => {
-                  e.target.src = isDarkMode ? DarkError : LightError
+                  page.error = true
+                  page.loaded = true
                 }
               "
               :alt="`第 ${index + 1} 页`"
