@@ -257,8 +257,8 @@ onUnmounted(() => {
           <div v-for="(page, index) in pages" :key="page.id || index" class="comic-page-item">
             <img
               :src="isDarkMode ? DarkLoading : LightLoading"
-              @load="(e) => (e.target.src = page.image)"
-              @error="
+              @load.once="(e) => (e.target.src = page.image)"
+              @error.once="
                 (e) => {
                   e.target.src = isDarkMode ? DarkError : LightError
                 }
